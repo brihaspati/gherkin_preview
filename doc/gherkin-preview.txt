@@ -1,5 +1,4 @@
 *gherkin-preview.txt*   Render Gherkin (.feature) files in your browser
-*gherkin-preview*
 
 ==============================================================================
 CONTENTS                                                   *gherkin-preview*
