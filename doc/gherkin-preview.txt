@@ -1,0 +1,128 @@
+*gherkin-preview.txt*   Render Gherkin (.feature) files in your browser
+*gherkin-preview*
+
+==============================================================================
+CONTENTS                                                   *gherkin-preview*
+  1. Introduction .................. |gherkin-preview-intro|
+  2. Installation .................. |gherkin-preview-install|
+  3. Usage ......................... |gherkin-preview-usage|
+  4. Commands ...................... |gherkin-preview-commands|
+  5. Configuration ................. |gherkin-preview-config|
+  6. Lua API ....................... |gherkin-preview-api|
+  7. Keymaps ....................... |gherkin-preview-keymaps|
+
+==============================================================================
+1. INTRODUCTION                                     *gherkin-preview-intro*
+
+gherkin-preview.nvim renders the current `.feature` (Gherkin/Cucumber) buffer
+as a semantic "living documentation" page in your browser — analogous to
+markdown-preview.nvim for Markdown.
+
+It parses Feature / Background / Rule / Scenario / Scenario Outline / Steps /
+Examples / data tables / doc strings / tags / comments and serves a styled,
+self-contained HTML page over a local server with live reload on save.
+
+No external runtime is required: the parser, renderer, and HTTP server are
+pure Lua built on Neovim's bundled libuv.
+
+==============================================================================
+2. INSTALLATION                                    *gherkin-preview-install*
+
+With lazy.nvim: >
+
+    {
+      "brihaspati/gherkin_preview",
+      ft = { "cucumber" },
+      config = function()
+        require("gherkin-preview").setup()
+      end,
+    }
+<
+
+With packer.nvim: >
+
+    use({ "brihaspati/gherkin_preview", config = function()
+      require("gherkin-preview").setup()
+    end })
+<
+
+The plugin ships an `ftdetect` that maps `*.feature` files to the `cucumber`
+filetype automatically.
+
+==============================================================================
+3. USAGE                                               *gherkin-preview-usage*
+
+Open a `.feature` file and run: >
+
+    :GherkinPreview
+<
+
+A server starts, your browser opens the rendered spec, and the page reloads
+whenever the buffer is written (`:write`) — or on every edit if
+`refresh_on_change` is enabled.
+
+Run the command again on the same buffer to stop the preview: >
+
+    :GherkinPreview
+<
+
+==============================================================================
+4. COMMANDS                                         *gherkin-preview-commands*
+
+:GherkinPreview             Start/toggle preview of the current buffer.
+:GherkinPreviewStop         Stop the preview server.
+:GherkinPreviewOpen         (Re)open the preview URL in the browser.
+
+==============================================================================
+5. CONFIGURATION                                     *gherkin-preview-config*
+
+Setup is optional; sensible defaults apply without it. Call: >
+
+    require("gherkin-preview").setup({
+      port = 0,                 -- 0 = OS-assigned; set a fixed value for a stable URL
+      browser = "auto",         -- "auto" | "none" | command string (e.g. "firefox {url}")
+      refresh_on_change = false, -- re-render on every edit, not just on save
+      hide_comments = false,     -- do not render "# comment" lines
+      theme = "auto",            -- "auto" | "light" | "dark"
+      dialect = nil,             -- custom dialect (see dialect.lua shape)
+      keymaps = {
+        toggle = nil,            -- e.g. "<leader>gp"
+        stop = nil,
+      },
+    })
+<
+
+`port = 0` (the default) lets the OS pick a free port, which avoids conflicts
+with other applications. Use a fixed value if you want a bookmarkable URL.
+
+==============================================================================
+6. LUA API                                             *gherkin-preview-api*
+
+Require the module and use the following functions: >
+
+    local gp = require("gherkin-preview")
+
+    gp.setup(opts)       -- configure (optional)
+    gp.toggle()          -- toggle preview for the current buffer
+    gp.preview(buf)      -- preview a specific buffer (defaults to current)
+    gp.refresh()         -- re-render and reload the connected browser
+    gp.open()            -- (re)open the URL in the browser
+    gp.stop()            -- stop the server
+    gp.get_url()         -- current preview URL (nil when stopped)
+<
+
+Lower-level modules are available too: `gherkin-preview.parser` (returns a
+document model) and `gherkin-preview.html` (renders a model to HTML).
+
+==============================================================================
+7. KEYMAPS                                           *gherkin-preview-keymaps*
+
+No default keymaps are set. Use the `keymaps` option in `setup()`, or bind the
+provided `<Plug>` mappings yourself: >
+
+    nmap <leader>gp <Plug>(gherkin-preview-toggle)
+    nmap <leader>gq <Plug>(gherkin-preview-stop)
+<
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help:norl
